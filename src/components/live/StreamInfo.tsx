@@ -1,8 +1,9 @@
-import { cn } from '@/lib/utils';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
-import { Eye, Bell, BellOff, Users } from 'lucide-react';
+import { cn } from "@/lib/utils";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Eye, Bell, BellOff, Users } from "lucide-react";
+import { formatCount } from "@/utils/format";
 
 interface StreamInfoProps {
   streamerName: string;
@@ -32,7 +33,9 @@ export default function StreamInfo({
   className,
 }: StreamInfoProps) {
   return (
-    <div className={cn('flex items-start justify-between gap-4 p-4', className)}>
+    <div
+      className={cn("flex items-start justify-between gap-4 p-4", className)}
+    >
       {/* Left: Streamer Info */}
       <div className="flex items-start gap-3 min-w-0">
         {/* Avatar with online indicator */}
@@ -48,7 +51,9 @@ export default function StreamInfo({
 
         {/* Stream Details */}
         <div className="min-w-0 flex-1">
-          <h1 className="truncate text-lg font-bold text-foreground">{title}</h1>
+          <h1 className="truncate text-lg font-bold text-foreground">
+            {title}
+          </h1>
           <div className="flex flex-wrap items-center gap-2 text-sm">
             <span className="font-semibold text-primary">{streamerName}</span>
             {category && (
@@ -74,7 +79,9 @@ export default function StreamInfo({
         {/* Viewer Count */}
         <div className="flex items-center gap-1.5 rounded-lg bg-secondary px-3 py-1.5">
           <Eye className="h-4 w-4 text-red-500" />
-          <span className="text-sm font-semibold">{formatCount(viewerCount)}</span>
+          <span className="text-sm font-semibold">
+            {formatCount(viewerCount)}
+          </span>
         </div>
 
         {/* Notifications Toggle */}
@@ -96,25 +103,15 @@ export default function StreamInfo({
         {/* Follow Button */}
         <Button
           onClick={onFollow}
-          variant={isFollowing ? 'secondary' : 'default'}
+          variant={isFollowing ? "secondary" : "default"}
           className={cn(
-            'font-semibold',
-            !isFollowing && 'bg-primary hover:bg-primary/90'
+            "font-semibold",
+            !isFollowing && "bg-primary hover:bg-primary/90",
           )}
         >
-          {isFollowing ? 'Following' : 'Follow'}
+          {isFollowing ? "Following" : "Follow"}
         </Button>
       </div>
     </div>
   );
-}
-
-function formatCount(count: number): string {
-  if (count >= 1000000) {
-    return `${(count / 1000000).toFixed(1)}M`;
-  }
-  if (count >= 1000) {
-    return `${(count / 1000).toFixed(1)}K`;
-  }
-  return count.toString();
 }

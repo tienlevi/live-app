@@ -1,13 +1,14 @@
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { QueryProvider } from "@/provider/queryProvider";
 import { routers } from "@/routes/routes";
+import Layout from "@/components/Layout";
 
 function App() {
   return (
     <QueryProvider>
       <BrowserRouter>
         <Routes>
-          <Route>
+          <Route element={<Layout />}>
             {routers.map((route) => (
               <Route key={route.id} path={route.href} element={route.element} />
             ))}
