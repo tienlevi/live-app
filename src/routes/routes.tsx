@@ -1,6 +1,7 @@
 import { Routes } from "@/models/types";
 import Detail from "@/pages/Detail";
 import Home from "@/pages/Home";
+import Livestream from "@/pages/Livestream";
 
 export const routers: Routes[] = [
   {
@@ -14,5 +15,11 @@ export const routers: Routes[] = [
     id: "live",
     name: "Live",
     element: <Detail />,
+  },
+  {
+    href: "/livestream",
+    id: "livestream",
+    name: "Livestream",
+    element: <Livestream />,
   },
 ];
