@@ -1,3 +1,4 @@
+import { useRef, useState } from "react";
 import {
   Button,
   Card,
@@ -7,17 +8,32 @@ import {
   CardTitle,
 } from "@/components/ui";
 import { cn } from "@/lib/utils";
-import { useCallStateHooks } from "@stream-io/video-react-sdk";
 import { Monitor, MonitorOff } from "lucide-react";
 
 function ScreenShare() {
-  const { useScreenShareState } = useCallStateHooks();
-  const { screenShare, status: screenShareStatus } = useScreenShareState();
-  const isScreenSharing = screenShareStatus === "enabled";
+  const [isScreenSharing, setIsScreenSharing] = useState(false);
+  const videoRef = useRef<HTMLVideoElement>(null);
 
   const toggleShareScreen = async () => {
     try {
-      await screenShare.toggle();
+      if (isScreenSharing) {
+        if (videoRef.current && videoRef.current.srcObject) {
+          const stream = videoRef.current.srcObject as MediaStream;
+          stream.getTracks().forEach((track) => track.stop());
+          videoRef.current.srcObject = null;
+        }
+        setIsScreenSharing(false);
+      } else {
+        const mediaStream = await navigator.mediaDevices.getDisplayMedia({
+          video: true,
+          audio: true,
+        });
+
+        if (videoRef.current) {
+          videoRef.current.srcObject = mediaStream;
+        }
+        setIsScreenSharing(true);
+      }
     } catch (error) {
       console.error("Failed to toggle screen share:", error);
     }
@@ -42,21 +58,19 @@ function ScreenShare() {
               : "border-border bg-muted/50 hover:border-primary/50 hover:bg-muted",
           )}
         >
-          <div className="flex flex-col items-center gap-3 text-center">
-            {isScreenSharing ? (
-              <>
-                <Monitor className="h-12 w-12 text-primary" />
-                <div>
-                  <p className="font-medium text-primary">
-                    Screen sharing active
-                  </p>
-                  <p className="text-xs text-muted-foreground">
-                    Click to stop sharing
-                  </p>
-                </div>
-              </>
-            ) : (
-              <>
+          <div className="relative flex flex-col items-center justify-center gap-3 text-center w-full h-full">
+            <video
+              ref={videoRef}
+              autoPlay
+              muted
+              playsInline
+              className={cn(
+                "h-full w-full object-contain absolute inset-0 rounded-lg",
+                !isScreenSharing && "hidden",
+              )}
+            />
+            {!isScreenSharing && (
+              <div className="flex flex-col items-center gap-3">
                 <MonitorOff className="h-12 w-12 text-muted-foreground" />
                 <div>
                   <p className="font-medium">Share your screen</p>
@@ -64,7 +78,7 @@ function ScreenShare() {
                     Click to start sharing
                   </p>
                 </div>
-              </>
+              </div>
             )}
           </div>
         </div>

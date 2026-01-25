@@ -1,3 +1,4 @@
+import { useState, useEffect, useRef } from "react";
 import {
   Button,
   Card,
@@ -6,57 +7,44 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui";
-import { useCallStateHooks, VideoPreview } from "@stream-io/video-react-sdk";
 import { Mic, MicOff, Users, Video, VideoOff } from "lucide-react";
+import { cn } from "@/lib/utils";
 
-function DisabledVideoPreview() {
-  return (
-    <div className="flex h-full w-full items-center justify-center bg-card">
-      <div className="flex flex-col items-center gap-2 text-muted-foreground">
-        <VideoOff className="h-16 w-16" />
-        <span className="text-sm">Camera is off</span>
-      </div>
-    </div>
-  );
+interface CameraProps {
+  isLive?: boolean;
+  participantCount?: number;
 }
 
-function NoCameraPreview() {
-  return (
-    <div className="flex h-full w-full items-center justify-center bg-card">
-      <div className="flex flex-col items-center gap-2 text-muted-foreground">
-        <VideoOff className="h-16 w-16" />
-        <span className="text-sm">No camera detected</span>
-      </div>
-    </div>
-  );
-}
+function Camera({ isLive = false, participantCount = 0 }: CameraProps) {
+  const [isOpenCamera, setIsOpenCamera] = useState(false);
+  const videoRef = useRef<HTMLVideoElement>(null);
 
-function Camera() {
-  const {
-    useCameraState,
-    useMicrophoneState,
-    useIsCallLive,
-    useParticipantCount,
-  } = useCallStateHooks();
-  const isLive = useIsCallLive();
-  const participantCount = useParticipantCount();
-  const { camera, isMute: isCameraMuted } = useCameraState();
-  const { microphone, isMute: isMicMuted } = useMicrophoneState();
   const toggleCamera = async () => {
     try {
-      await camera.toggle();
+      if (isOpenCamera) {
+        if (videoRef.current && videoRef.current.srcObject) {
+          const stream = videoRef.current.srcObject as MediaStream;
+          stream.getTracks().forEach((track) => track.stop());
+          videoRef.current.srcObject = null;
+        }
+        setIsOpenCamera(false);
+      } else {
+        const camera = await navigator.mediaDevices.getUserMedia({
+          video: true,
+          audio: true,
+        });
+        if (videoRef.current) {
+          videoRef.current.srcObject = camera;
+        }
+        setIsOpenCamera(true);
+      }
     } catch (error) {
       console.error("Failed to toggle camera:", error);
     }
   };
 
-  const toggleMicrophone = async () => {
-    try {
-      await microphone.toggle();
-    } catch (error) {
-      console.error("Failed to toggle microphone:", error);
-    }
-  };
+  const toggleMicrophone = async () => {};
+
   return (
     <Card>
       <CardHeader className="pb-3">
@@ -70,11 +58,26 @@ function Camera() {
       </CardHeader>
       <CardContent className="space-y-4">
         <div className="relative aspect-video overflow-hidden rounded-lg bg-black">
-          <VideoPreview
-            mirror={true}
-            DisabledVideoPreview={DisabledVideoPreview}
-            NoCameraPreview={NoCameraPreview}
-          />
+          <div className="flex h-full w-full items-center justify-center bg-card">
+            <div className="flex flex-col items-center gap-2 text-muted-foreground">
+              <video
+                ref={videoRef}
+                autoPlay
+                muted
+                playsInline
+                className={cn(
+                  "h-full w-full object-contain absolute inset-0 rounded-lg",
+                  !isOpenCamera && "hidden",
+                )}
+              />
+              {!isOpenCamera && (
+                <div className="flex flex-col items-center gap-2">
+                  <VideoOff className="h-16 w-16" />
+                  <span className="text-sm">Camera is off</span>
+                </div>
+              )}
+            </div>
+          </div>
           {isLive && (
             <div className="absolute left-3 top-3 flex items-center gap-2 rounded-md bg-red-600 px-2 py-1 text-xs font-medium text-white">
               <span className="relative flex h-2 w-2">
@@ -95,30 +98,30 @@ function Camera() {
         {/* Camera/Mic Controls */}
         <div className="flex items-center justify-center gap-3">
           <Button
-            variant={!isCameraMuted ? "secondary" : "destructive"}
+            variant={isOpenCamera ? "secondary" : "destructive"}
             size="icon"
             onClick={toggleCamera}
             className="h-12 w-12 rounded-full"
-            title={isCameraMuted ? "Turn on camera" : "Turn off camera"}
+            title={isOpenCamera ? "Turn off camera" : "Turn on camera"}
           >
-            {!isCameraMuted ? (
+            {isOpenCamera ? (
               <Video className="h-5 w-5" />
             ) : (
               <VideoOff className="h-5 w-5" />
             )}
           </Button>
           <Button
-            variant={!isMicMuted ? "secondary" : "destructive"}
+            // variant={isMicrophoneEnabled ? "secondary" : "destructive"}
             size="icon"
             onClick={toggleMicrophone}
             className="h-12 w-12 rounded-full"
-            title={isMicMuted ? "Unmute" : "Mute"}
+            // title={isMicrophoneEnabled ? "Mute" : "Unmute"}
           >
-            {!isMicMuted ? (
+            {/* {isMicrophoneEnabled ? (
               <Mic className="h-5 w-5" />
             ) : (
               <MicOff className="h-5 w-5" />
-            )}
+            )} */}
           </Button>
         </div>
       </CardContent>

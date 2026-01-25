@@ -6,16 +6,13 @@
     },
     "figma_mcp_framelink": {
       "command": "cmd",
-      "args": [
-        "/c",
-        "npx",
-        "-y",
-        "figma-developer-mcp",
-        "--stdio"
-      ],
+      "args": ["/c", "npx", "-y", "figma-developer-mcp", "--stdio"],
       "env": {
         "FIGMA_API_KEY": "FIGMA_API_KEY"
       }
+    },
+    "livekit-docs": {
+      "url": "https://docs.livekit.io/mcp"
     },
     "supabase-mcp-server": {
       "command": "npx",
