@@ -1,5 +1,5 @@
 import { Routes } from "@/models/types";
-import Detail from "@/pages/Detail";
+import Detail from "@/pages/Room";
 import Home from "@/pages/Home";
 import Livestream from "@/pages/Livestream";
 
@@ -11,9 +11,9 @@ export const routers: Routes[] = [
     element: <Home />,
   },
   {
-    href: "/detail/:id",
-    id: "live",
-    name: "Live",
+    href: "/room",
+    id: "room",
+    name: "Room",
     element: <Detail />,
   },
   {

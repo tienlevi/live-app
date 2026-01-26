@@ -7,3 +7,16 @@ export function formatCount(count: number): string {
   }
   return count.toString();
 }
+
+export function randomID(length: number) {
+  let result = "";
+  if (result) return result;
+  var chars = "12345qwertyuiopasdfgh67890jklmnbvcxzMNBVCZXASDQWERTYHGFUIOLKJP",
+    maxPos = chars.length,
+    i;
+  length = length || 5;
+  for (i = 0; i < length; i++) {
+    result += chars.charAt(Math.floor(Math.random() * maxPos));
+  }
+  return result;
+}
