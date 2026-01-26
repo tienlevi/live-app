@@ -1,5 +1,5 @@
-import Live from "@/components/live";
+import Introduce from "@/components/Introduce";
 
 export default function Home() {
-  return <Live />;
+  return <Introduce />;
 }
