@@ -25,7 +25,7 @@ function CTA() {
           </CardHeader>
           <CardContent className="flex justify-center pb-8">
             <Button size="lg" asChild>
-              <Link to="/livestream">Get Started for Free</Link>
+              <Link to="/join-room">Get Started for Free</Link>
             </Button>
           </CardContent>
         </Card>

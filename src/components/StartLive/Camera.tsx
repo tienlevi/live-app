@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useRef } from "react";
 import {
   Button,
   Card,
@@ -7,7 +7,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui";
-import { Mic, MicOff, Users, Video, VideoOff } from "lucide-react";
+import { Users, Video, VideoOff } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 interface CameraProps {
