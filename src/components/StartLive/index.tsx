@@ -5,30 +5,37 @@ import Camera from "./Camera";
 import ScreenShare from "./ScreenShare";
 import zg from "@/utils/zg";
 import useLivestream from "@/hooks/useLivestream";
+import { randomID } from "@/utils/format";
+import { getUrlParams } from "@/utils/params";
+import { useNavigate } from "react-router-dom";
 
 function StartLive() {
+  const roomID = getUrlParams().get("roomID") || randomID(5);
   const { createLivestream, isStartingLive } = useLivestream();
-  const [roomId, setRoomId] = useState("");
+  const navigate = useNavigate();
+  const [room, setRoom] = useState("");
+
+  const handleCreateRoom = () => {
+    navigate(`/room?roomID=${roomID}&role=Cohost`);
+  };
 
   const handleJoinRoom = () => {
-    if (roomId.trim()) {
-      // TODO: Implement join room logic
-      console.log("Joining room:", roomId);
-    }
+    navigate(`/room?roomID=${room}&role=Audience`);
   };
 
   useEffect(() => {
-    zg.on("publisherStateUpdate", (result) => {
-      console.log("🚀 ~ useLivestream ~ result:", result);
-      // Callback for updates on stream publishing status.
-      // ...
-    });
+    zg.on("roomStateUpdate", (roomID, state, errorCode, extendedData) => {
+      if (state == "DISCONNECTED") {
+        // Disconnected from the room
+      }
 
-    zg.on("publishQualityUpdate", (streamID, stats) => {
-      console.log("🚀 ~ useLivestream ~ streamID:", streamID);
-      console.log("🚀 ~ useLivestream ~ stats:", stats);
-      // Callback for reporting stream publishing quality.
-      // ...
+      if (state == "CONNECTING") {
+        // Connecting to the room
+      }
+
+      if (state == "CONNECTED") {
+        // Connected to the room
+      }
     });
   }, []);
 
@@ -40,7 +47,7 @@ function StartLive() {
           <ScreenShare />
           <Button
             disabled={isStartingLive}
-            onClick={() => createLivestream()}
+            onClick={handleCreateRoom}
             variant={"default"}
             className="w-full gap-2 py-6 text-lg"
             size="lg"
@@ -56,12 +63,12 @@ function StartLive() {
           <div className="flex gap-2">
             <Input
               placeholder="Enter Room ID"
-              value={roomId}
-              onChange={(e) => setRoomId(e.target.value)}
+              value={room}
+              onChange={(e) => setRoom(e.target.value)}
               className="flex-1"
             />
             <Button
-              disabled={!roomId.trim()}
+              disabled={!room.trim()}
               onClick={handleJoinRoom}
               variant="outline"
               size="lg"

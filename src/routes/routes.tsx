@@ -1,5 +1,5 @@
 import { Routes } from "@/models/types";
-import Detail from "@/pages/Room";
+import Room from "@/pages/Room";
 import Home from "@/pages/Home";
 import JoinRoom from "@/pages/JoinRoom";
 
@@ -14,7 +14,7 @@ export const routers: Routes[] = [
     href: "/room",
     id: "room",
     name: "Room",
-    element: <Detail />,
+    element: <Room />,
   },
   {
     href: "/join-room",
