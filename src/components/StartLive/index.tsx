@@ -1,85 +1,79 @@
-import { useEffect, useState } from "react";
-import { Button, Input } from "@/components/ui";
-import { Radio, Users } from "lucide-react";
-import Camera from "./Camera";
-import ScreenShare from "./ScreenShare";
-import zg from "@/utils/zg";
 import useLivestream from "@/hooks/useLivestream";
-import { randomID } from "@/utils/format";
-import { getUrlParams } from "@/utils/params";
-import { useNavigate } from "react-router-dom";
+import zg from "@/utils/zg";
+import { useEffect } from "react";
+import {
+  useLivestreamStore,
+  useLivestreamEvent,
+} from "@/stores/useLivestreamStore";
+import Control from "./Control";
+import Video from "./Video";
+import Info from "./Info";
+import Devices from "./Devices";
 
 function StartLive() {
-  const roomID = getUrlParams().get("roomID") || randomID(5);
-  const { createLivestream, isStartingLive } = useLivestream();
-  const navigate = useNavigate();
-  const [room, setRoom] = useState("");
-
-  const handleCreateRoom = () => {
-    navigate(`/room?roomID=${roomID}&role=Cohost`);
-  };
-
-  const handleJoinRoom = () => {
-    navigate(`/room?roomID=${room}&role=Audience`);
-  };
+  const { role, playRemoteStream, logoutRoom } = useLivestream();
+  const {
+    remoteStreams,
+    roomState,
+    isPlaying,
+    isPublishing,
+    setRemoteStreams,
+    setIsPlaying,
+  } = useLivestreamStore();
 
   useEffect(() => {
-    zg.on("roomStateUpdate", (roomID, state, errorCode, extendedData) => {
-      if (state == "DISCONNECTED") {
-        // Disconnected from the room
-      }
+    // Stream updates (when other users start/stop publishing)
+    zg.on("roomStreamUpdate", async (_roomID, updateType, streamList) => {
+      if (updateType === "ADD") {
+        const newStreamIDs = streamList.map((stream) => stream.streamID);
+        setRemoteStreams([...remoteStreams, ...newStreamIDs]);
 
-      if (state == "CONNECTING") {
-        // Connecting to the room
-      }
-
-      if (state == "CONNECTED") {
-        // Connected to the room
+        // Auto-play the first stream for audience
+        if (role === "audience" && newStreamIDs.length > 0) {
+          await playRemoteStream(newStreamIDs[0]);
+        }
+      } else if (updateType === "DELETE") {
+        const deletedIDs = streamList.map((stream) => stream.streamID);
+        setRemoteStreams(
+          remoteStreams.filter((id) => !deletedIDs.includes(id)),
+        );
+        setIsPlaying(false);
       }
     });
+  }, [zg]);
+
+  useEffect(() => {
+    return () => {
+      logoutRoom();
+    };
   }, []);
 
+  useLivestreamEvent(role);
+
+  const isConnected = roomState === "connected";
+  const isLive = isConnected && (isPublishing || isPlaying);
+
   return (
-    <div className="my-4">
-      <div className="grid grid-cols-2 gap-6">
-        <Camera />
-        <div className="space-y-4">
-          <ScreenShare />
-          <Button
-            disabled={isStartingLive}
-            onClick={handleCreateRoom}
-            variant={"default"}
-            className="w-full gap-2 py-6 text-lg"
-            size="lg"
-          >
-            <Radio className="h-5 w-5" />
-            {isStartingLive ? "Loading..." : "Go Live"}
-          </Button>
-          <div className="flex items-center gap-2">
-            <div className="h-px flex-1 bg-border" />
-            <span className="text-sm text-muted-foreground">or</span>
-            <div className="h-px flex-1 bg-border" />
+    <div className="mt-20">
+      <div className="relative w-full space-y-3">
+        {/* Video Container */}
+        <Devices />
+        <Video />
+        {/* Live Indicator Badge */}
+        {isLive && (
+          <div className="absolute left-4 top-4 flex items-center gap-2 rounded-md bg-red-600 px-3 py-1.5 text-sm font-semibold text-white shadow-lg">
+            <span className="relative flex h-2.5 w-2.5">
+              <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-white opacity-75"></span>
+              <span className="relative inline-flex h-2.5 w-2.5 rounded-full bg-white"></span>
+            </span>
+            LIVE
           </div>
-          <div className="flex gap-2">
-            <Input
-              placeholder="Enter Room ID"
-              value={room}
-              onChange={(e) => setRoom(e.target.value)}
-              className="flex-1"
-            />
-            <Button
-              disabled={!room.trim()}
-              onClick={handleJoinRoom}
-              variant="outline"
-              size="lg"
-              className="gap-2"
-            >
-              <Users className="h-5 w-5" />
-              Join
-            </Button>
-          </div>
-        </div>
+        )}
+
+        <Control />
       </div>
+
+      <Info />
     </div>
   );
 }

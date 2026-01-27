@@ -1,7 +1,8 @@
 import { Routes } from "@/models/types";
 import Room from "@/pages/Room";
+import Rooms from "@/pages/Rooms";
 import Home from "@/pages/Home";
-import JoinRoom from "@/pages/JoinRoom";
+import Livestream from "@/pages/Livestream";
 
 export const routers: Routes[] = [
   {
@@ -17,9 +18,15 @@ export const routers: Routes[] = [
     element: <Room />,
   },
   {
-    href: "/join-room",
-    id: "joinRoom",
-    name: "JoinRoom",
-    element: <JoinRoom />,
+    href: "/rooms",
+    id: "rooms",
+    name: "Rooms",
+    element: <Rooms />,
+  },
+  {
+    href: "/livestream",
+    id: "Livestream",
+    name: "Livestream",
+    element: <Livestream />,
   },
 ];

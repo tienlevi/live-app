@@ -42,7 +42,7 @@ function Hero() {
             className="w-full sm:w-auto"
             asChild
           >
-            <Link to="/join-room">
+            <Link to="/livestream">
               <Video className="mr-2 size-5" />
               Start Streaming
             </Link>

@@ -3,7 +3,9 @@
     "allow": [
       "Bash(pnpm build)",
       "WebFetch(domain:getstream.io)",
-      "Bash(pnpm dlx:*)"
+      "Bash(pnpm dlx:*)",
+      "WebFetch(domain:www.zegocloud.com)",
+      "WebSearch"
     ]
   }
 }
