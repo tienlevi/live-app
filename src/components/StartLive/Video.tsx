@@ -10,25 +10,12 @@ function Video() {
   const isLive = isConnected && (isPublishing || isPlaying);
 
   return (
-    <div className="relative aspect-video w-full overflow-hidden rounded-lg bg-black">
-      {/* Local video for host */}
+    <div className="relative aspect-video w-full rounded-lg">
       {role === "host" && (
-        <video
-          ref={localVideoRef}
-          autoPlay
-          muted
-          playsInline
-          className="h-full w-full object-cover"
-        />
+        <div ref={localVideoRef} className="h-full w-full object-cover" />
       )}
-      {/* Remote video for audience */}
       {role === "audience" && (
-        <video
-          ref={remoteVideoRef}
-          autoPlay
-          playsInline
-          className="h-full w-full object-cover"
-        />
+        <video ref={remoteVideoRef} className="h-full w-full object-cover" />
       )}
 
       {/* Placeholder when not streaming */}

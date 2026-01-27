@@ -1,6 +1,6 @@
 import useLivestream from "@/hooks/useLivestream";
 import zg from "@/utils/zg";
-import { useEffect } from "react";
+import { useEffect, useCallback } from "react";
 import {
   useLivestreamStore,
   useLivestreamEvent,
@@ -11,36 +11,44 @@ import Info from "./Info";
 import Devices from "./Devices";
 
 function StartLive() {
-  const { role, playRemoteStream, logoutRoom } = useLivestream();
-  const {
-    remoteStreams,
-    roomState,
-    isPlaying,
-    isPublishing,
-    setRemoteStreams,
-    setIsPlaying,
-  } = useLivestreamStore();
+  const { role, logoutRoom, playRemoteStream, stopPlaying } = useLivestream();
+  const { roomState, isPlaying, isPublishing, setRemoteStreams, setIsPlaying } =
+    useLivestreamStore();
 
-  useEffect(() => {
-    // Stream updates (when other users start/stop publishing)
-    zg.on("roomStreamUpdate", async (_roomID, updateType, streamList) => {
+  const handleStreamUpdate = useCallback(
+    async (
+      _roomID: string,
+      updateType: "ADD" | "DELETE",
+      streamList: { streamID: string }[],
+    ) => {
+      const currentStreams = useLivestreamStore.getState().remoteStreams;
+
       if (updateType === "ADD") {
         const newStreamIDs = streamList.map((stream) => stream.streamID);
-        setRemoteStreams([...remoteStreams, ...newStreamIDs]);
+        setRemoteStreams([...currentStreams, ...newStreamIDs]);
 
-        // Auto-play the first stream for audience
         if (role === "audience" && newStreamIDs.length > 0) {
           await playRemoteStream(newStreamIDs[0]);
         }
       } else if (updateType === "DELETE") {
         const deletedIDs = streamList.map((stream) => stream.streamID);
+
         setRemoteStreams(
-          remoteStreams.filter((id) => !deletedIDs.includes(id)),
+          currentStreams.filter((id) => !deletedIDs.includes(id)),
         );
         setIsPlaying(false);
       }
-    });
-  }, [zg]);
+    },
+    [role, playRemoteStream, stopPlaying, setRemoteStreams, setIsPlaying],
+  );
+
+  useEffect(() => {
+    zg.on("roomStreamUpdate", handleStreamUpdate);
+
+    return () => {
+      zg.off("roomStreamUpdate");
+    };
+  }, [handleStreamUpdate]);
 
   useEffect(() => {
     return () => {

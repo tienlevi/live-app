@@ -24,12 +24,12 @@ function Camera() {
         }
         setIsOpen(false);
       } else {
-        const camera = await navigator.mediaDevices.getUserMedia({
+        const devices = await navigator.mediaDevices.getUserMedia({
           video: true,
           audio: true,
         });
         if (videoRef.current) {
-          videoRef.current.srcObject = camera;
+          videoRef.current.srcObject = devices;
         }
         setIsOpen(true);
       }
@@ -76,17 +76,12 @@ function Camera() {
         {/* Camera/Mic Controls */}
         <div className="flex items-center justify-center gap-3">
           <Button
-            variant={isOpen ? "secondary" : "destructive"}
+            variant={isOpen ? "destructive" : "secondary"}
             size="icon"
             onClick={toggleCameraAndMicrophone}
-            className="h-12 w-12 rounded-full"
-            title={isOpen ? "Turn off camera" : "Turn on camera"}
+            className="w-full rounded-lg"
           >
-            {isOpen ? (
-              <Video className="h-5 w-5" />
-            ) : (
-              <VideoOff className="h-5 w-5" />
-            )}
+            {isOpen ? <div>Turn off devices</div> : <div>Turn on devices</div>}
           </Button>
         </div>
       </CardContent>
